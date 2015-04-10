@@ -21,7 +21,7 @@ outputpath = getenv('OUTPUTDATAPATH');
 
 if(exist(sprintf('%s/mat/raw_sonar_data.mat',outputpath),'file'))
     fprintf('ALREADY DONE\n');
-    exit;
+    %exit;
 end
 
 % Leitura de Dados
@@ -123,12 +123,13 @@ fprintf('Creating Raw Data File\n');
 
 save(sprintf('%s/mat/raw_sonar_data.mat',outputpath),'fs','total','raw_data','class_labels');
 
-clear all;
 close all;
 
 if develop
     fprintf('Finishing Create Raw Data\n');
+    clear all;
 else
     fprintf('Finishing Create Raw Data\n');
+    clear all;
     exit;
 end

@@ -21,7 +21,8 @@ outputpath = getenv('OUTPUTDATAPATH');
 
 if(~exist(sprintf('%s/mat/raw_sonar_data.mat',outputpath),'file'))
     fprintf('DO create_raw_data.m\n');
-    exit;
+    %exit;
+    return;
 end
 
 load(sprintf('%s/mat/raw_sonar_data.mat',outputpath));
@@ -31,13 +32,13 @@ load(sprintf('%s/mat/raw_sonar_data.mat',outputpath));
 for i_pts_fft = 5:13
     n_pts_fft = 2^i_pts_fft;
     
-    if(exist(sprintf('%s/mat/lofar_sonar_data_nfft_%i.mat',outputpath,n_pts_fft),'file'))
-        fprintf('LOFAR Analysis for %i already DONE\n',n_pts_fft);
-        continue;
-    end
-    
+%     if(exist(sprintf('%s/mat/lofar_sonar_data_nfft_%i.mat',outputpath,n_pts_fft),'file'))
+%         fprintf('LOFAR Analysis for %i already DONE\n',n_pts_fft);
+%         continue;
+%     end
+%     
     % do LOFAR Analysis
-    decimation_rate = 0;
+    decimation_rate = 4;
     
     num_overlap = 0;
     
@@ -65,8 +66,9 @@ for i_pts_fft = 5:13
         intensity(find(intensity<-.2))=0;
         total_lofar.(class_labels{j}) = intensity;
         
-        figure;
+        h_hand = figure;
         imagesc(f,t,intensity');
+        colorbar;
         
         if decimation_rate >=1
             title(sprintf('LOFARgram for Class %s with Decimation Ratio: %d - (pts windows: %i)',class_labels{j},decimation_rate,n_pts_fft),'FontSize', 15,'FontWeight', 'bold');
@@ -76,15 +78,16 @@ for i_pts_fft = 5:13
         
         ylabel('Time (seconds)','FontSize', 15,'FontWeight', 'bold');
         xlabel('Frequency (Hz)','FontSize', 15,'FontWeight', 'bold');
-        fig2pdf(gcf,sprintf('%s/pict/sonar/lofargram_class%s_n_pts_fft_%i.pdf',outputpath,class_labels{j},n_pts_fft));
-        close(gcf);
+        fig2pdf(h_hand,sprintf('%s/pict/sonar/lofargram_class%s_n_pts_fft_%i_decimation_factor_%i.pdf',outputpath,class_labels{j},n_pts_fft,decimation_rate));
+        saveas(h_hand,sprintf('%s/pict/sonar/lofargram_class%s_n_pts_fft_%i_decimation_factor_%i.png',outputpath,class_labels{j},n_pts_fft,decimation_rate));
+        close(h_hand);
         
         fprintf('Windows Qtd:  %1.0f\n',size(t,2));
         fprintf('Windows Size:  %1.0f\n\n',size(total.(class_labels{j}),1)/size(t,2));
     end
     
     fprintf('Creating LOFAR Data File\n');
-    save(sprintf('%s/mat/lofar_sonar_data_nfft_%i.mat',outputpath,n_pts_fft),'decimation_rate','Fs','num_overlap','norm_parameters','total_lofar','n_pts_fft');
+    save(sprintf('%s/mat/lofar_sonar_data_nfft_%i_decimation_factor_%i.mat',outputpath,n_pts_fft,decimation_rate),'decimation_rate','Fs','num_overlap','norm_parameters','total_lofar','n_pts_fft');
 end
 
 % if(exist(sprintf('%s/mat/lofar_sonar_data.mat',outputpath),'file'))
